@@ -14,26 +14,26 @@ but neither the “origin” or “target” Kafka clusters need to be managed b
 We’ll be running MirrorMaker 2 in a namespace called “migration”.
 
 
-step 1 run kafkauser on Origin cluster
+step 1 run kafka-user-origin.yaml on Origin cluster
 
-step 2 run secret on Origin cluster
+step 2 run kafka-password-origin.yaml on Origin cluster
 
 If your “origin” cluster is managed by Strimzi, 
 you will be able to find this in a Secret called something like origin-cluster-ca-cert in the namespace where your Kafka cluster is running.
 
-step 3 run tls-secret on Origin cluster -->--> add the ca.crt from the secret!
+step 3 run kafka-secret-origin.yaml on Origin cluster -->--> add the ca.crt from the secret!
 
-step 4 run target-user on Target cluster
+step 4 run kafka-user-target.yaml on Target cluster
 
-step 5 run credentials-target on Target cluster
+step 5 run kafka-password-target.yaml on Target cluster
 
 If your “target” cluster is managed by Strimzi, 
 you will be able to find this in a Secret called something like target-cluster-ca-cert in the namespace where your Kafka cluster is running.
 
-step 6 rum  tls-secret-target --> add the ca.crt from the secret!
+step 6 rum  kafka-secret-target.yaml --> add the ca.crt from the secret!
 
 
-step 7 review and customize the file KafkaMirrorMaker
+step 7 review and customize the file KafkaMirrorMaker.yaml
 
 step 8 one you read and add the values in KafakamirrorMaker file  run it.
 
