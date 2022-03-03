@@ -1,0 +1,122 @@
+apiVersion: kafka.strimzi.io/v1alpha1
+kind: KafkaMirrorMaker2
+metadata:
+  name: data-migration
+  namespace: migration
+spec:
+  # How many instances of MirrorMaker 2 do you want to run in parallel?
+  #
+  # If you have a large "origin" cluster with a lot of data to migrate
+  #  then you can increase this value.
+  replicas: 1
+
+
+  clusters:
+
+  # connection details for your "origin" cluster
+  - alias: "origin-cluster"
+    # change this to provide the bootstrap servers address for your "origin" cluster
+    bootstrapServers: "origin-kafka-bootstrap-origin-ns.apps.my-origin-cluster-name.cp.fyre.ibm.com:443"
+    # remove this section if your "origin" cluster does not require authentication
+    authentication:
+      # update this to match the authentication method used by your "origin" cluster
+      type: scram-sha-512
+      username: mm2-credentials
+      passwordSecret:
+        # name of the secret where you stored the
+        #  credentials for your "origin" cluster
+        secretName: origin-cluster-credentials
+        # name of the key in the secret that contains
+        #  the password
+        password: password
+    # remove this section if your "origin" cluster does not require a custom TLS CA certificate
+    tls:
+      trustedCertificates:
+        # name of the secret where you stored the
+        #  TLS certificate for your "origin" cluster
+        - secretName: origin-cluster-ca-cert
+          # name of the key in the secret that contains
+          #  the certificate
+          certificate: ca.crt
+
+  # connection details for your "target" cluster
+  - alias: "target-cluster"
+    # change this to provide the bootstrap servers address for your "target" cluster
+    bootstrapServers: "target-kafka-bootstrap-target-ns.apps.my-target-cluster-name.cp.fyre.ibm.com:443"
+    # remove this section if your "target" cluster does not require authentication
+    authentication:
+      # update this to match the authentication method used by your "target" cluster
+      type: scram-sha-512
+      username: mm2-credentials
+      passwordSecret:
+        # name of the secret where you stored the
+        #  credentials for your "target" cluster
+        secretName: target-cluster-credentials
+        # name of the key in the secret that contains
+        #  the password
+        password: password
+    # remove this section if your "target" cluster does not require a custom TLS CA certificate
+    tls:
+      trustedCertificates:
+        # name of the secret where you stored the
+        #  TLS certificate for your "target" cluster
+        - secretName: target-cluster-ca-cert
+          # name of the key in the secret that contains
+          #  the certificate
+          certificate: ca.crt
+    config:
+      # These topics will be created on the "target" Kafka
+      #  cluster for MirrorMaker 2 to store it's state.
+      # Make sure that these names don't match the names of any
+      #  of your existing topics.
+      # We will delete these topics once MirrorMaker 2 has finished.
+      offset.storage.topic: migration-connect-cluster-offsets
+      config.storage.topic: migration-connect-cluster-configs
+      status.storage.topic: migration-connect-cluster-status
+
+  connectCluster: "target-cluster"
+
+  mirrors:
+    - sourceCluster: "origin-cluster"
+      targetCluster: "target-cluster"
+      sourceConnector:
+        config:
+          # the replication factor that will be used for
+          #  all topics created on the "target" Kafka cluster
+          replication.factor: 1
+
+          # don't try to copy permissions across from the "origin"
+          #  cluster to the "target" cluster
+          sync.topic.acls.enabled: "false"
+          # create topics on the "target" cluster with names that
+          #  match the names of the topics on the "origin" cluster
+          replication.policy.class: "io.strimzi.kafka.connect.mirror.IdentityReplicationPolicy"
+          replication.policy.separator: ""
+          # syncing offsets
+          offset-syncs.topic.replication.factor: 1
+
+      checkpointConnector:
+        config:
+          checkpoints.topic.replication.factor: 1
+          refresh.groups.interval.seconds: 600
+          # migrates the consumer group offsets
+          emit.checkpoints.enabled: true
+          sync.group.offsets.enabled: true
+          sync.group.offsets.interval.seconds: 60
+          emit.checkpoints.interval.seconds: 60
+          # ensures that consumer group offsets on the "target" cluster
+          #  are correctly mapped to consumer groups on the "origin" cluster
+          replication.policy.class: "io.strimzi.kafka.connect.mirror.IdentityReplicationPolicy"
+          replication.policy.separator: ""
+
+      # Which topics should be migrated from the
+      #  "origin" cluster to the "target" cluster ?
+      # If you don't want to migrate all of your topics, modify this pattern to
+      #  match only the topics you want. 
+      topicsPattern: ".*"
+
+      # Which consumer groups should be migrated from the
+      #  "origin" cluster to the "target" cluster ?
+      # If you don't want to migrate all of your groups, modify this pattern to
+      #  match only the groups you want. 
+      groupsPattern: ".*
