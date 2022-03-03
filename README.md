@@ -19,13 +19,17 @@ you will be able to find this in a Secret called something like origin-cluster-c
 step 3 run tls-secret on Origin cluster -->--> add the ca.crt from the secret!
 
 step 4 run target-user on Target cluster
+
 step 5 run credentials-target on Target cluster
 
 If your “target” cluster is managed by Strimzi, 
 you will be able to find this in a Secret called something like target-cluster-ca-cert in the namespace where your Kafka cluster is running.
+
 step 6 rum  tls-secret-target --> add the ca.crt from the secret!
 
+
 step 7 review and customize the file KafkaMirrorMaker
+
 step 8 one you read and add the values in KafakamirrorMaker file  run it.
 
 Enjoy the data replication across cluster, DC, etc
