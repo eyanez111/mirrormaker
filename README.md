@@ -1,5 +1,6 @@
 # mirrormaker strimzi tutorial
-'For months I found nothing in the internet until I found a great tutorial that needed a bit of work. So I implemened a few things and eplinations came out with this tutorial and here it is!!'
+`'For months I found nothing in the internet until I found a great tutorial that needed a bit of work. So I implemened a few things and eplinations came out with this tutorial and here it is!!'`
+
 Terminology
 For the purposes of this post, we’ll refer to the two Kafka clusters as:
 
