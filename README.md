@@ -3,8 +3,11 @@ Terminology
 For the purposes of this post, we’ll refer to the two Kafka clusters as:
 
 “origin” – your existing Kafka cluster that you are migrating from
+
 “target” – your new Kafka cluster that you are migrating to
-The instructions here use the Strimzi Operator as a convenient way to configure and run MirrorMaker 2, but neither the “origin” or “target” Kafka clusters need to be managed by the Strimzi Operator for this to work.
+
+The instructions here use the Strimzi Operator as a convenient way to configure and run MirrorMaker 2, 
+but neither the “origin” or “target” Kafka clusters need to be managed by the Strimzi Operator for this to work.
 
 We’ll be running MirrorMaker 2 in a namespace called “migration”.
 
