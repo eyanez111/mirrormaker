@@ -10,10 +10,12 @@ We’ll be running MirrorMaker 2 in a namespace called “migration”.
 
 
 step 1 run kafkauser on Origin cluster
+
 step 2 run secret on Origin cluster
 
 If your “origin” cluster is managed by Strimzi, 
 you will be able to find this in a Secret called something like origin-cluster-ca-cert in the namespace where your Kafka cluster is running.
+
 step 3 run tls-secret on Origin cluster -->--> add the ca.crt from the secret!
 
 step 4 run target-user on Target cluster
