@@ -1,44 +1,129 @@
-# mirrormaker strimzi tutorial
-`'For months I found nothing in the internet until I found a great tutorial that needed a bit of work. So I implemened a few things and eplinations came out with this tutorial and here it is!!'`
 
-Terminology
-For the purposes of this post, we’ll refer to the two Kafka clusters as:
+# Ultimate MirrorMaker2 Strimzi Tutorial
+
+For Months I struggle trying to make fully work MirrorMaker. Specially if TLS is implemented. The problem is that there is not a full tutorial, on how to install it and how to make it work. You need to do tons of little independent researches and glue them together (in the right order). So it becomes an expert exercise. Overall is not hard of complex is just there is not enough information out there in one single place to make it work step by step.... Until now!
+
+## Assumptions:
+
+- You have strimzi installed and working (minimum in two clusters). If you I do recommend you to go to their official webpage and follow their installation tutorials, join their slack and say thanks to Jakub. He is a really nice guy always helping.
+- You have two different Kafkas running in the same or in a different kubernetes but over all this exercise is a how to do a data-sync between two different kafka clusters.
+- You have good knowledge of kubernetes. if not this is the wrong place to start and I do recommend you to start a course in kubernetes, then comeback.
+
+## Terminology
+For the purposes of this tutorial, we’ll refer to the two Kafka clusters as:
 
 “origin” – your existing Kafka cluster that you are migrating from
 
 “target” – your new Kafka cluster that you are migrating to
 
-The instructions here use the Strimzi Operator as a convenient way to configure and run MirrorMaker 2, 
-but neither the “origin” or “target” Kafka clusters need to be managed by the Strimzi Operator for this to work.
+The instructions here use the Strimzi Operator as a convenient way to configure and run MirrorMaker 2, but neither the “origin” or “target” Kafka clusters need to be managed by the Strimzi Operator for this to work.
 
 We’ll be running MirrorMaker 2 in a namespace called “migration”.
 
+## Steps
 
-step 1 run kafka-user-origin.yaml on Origin cluster
+1. Before you start, you need to obtain credentials and TLS certificates for both of your Kafka clusters:
 
-step 2 run kafka-password-origin.yaml on Origin cluster
+    Credentials from the “origin” cluster
+    TLS certificate from the “origin” cluster
+    Credentials from the “target” cluster
+    TLS certificate from the “target” cluster
 
-If your “origin” cluster is managed by Strimzi, 
-you will be able to find this in a Secret called something like origin-cluster-ca-cert in the namespace where your Kafka cluster is running.
+Credentials from the “origin” cluster
 
-step 3 run kafka-secret-origin.yaml on Origin cluster -->--> add the ca.crt from the secret!
+If your “origin” cluster requires authentication, you will need to create credentials for MirrorMaker 2 to use.
 
-step 4 run kafka-user-target.yaml on Target cluster
+If your “origin” cluster is managed by Strimzi, you could do this by creating a KafkaUser resource something like this 
 
-step 5 run kafka-password-target.yaml on Target cluster
+Look at the Kafka-user-origin.yaml file
+apiVersion: kafka.strimzi.io/v1beta1
+```
+kind: KafkaUser
+metadata:
+  name: mm2-credentials
+  labels:
+    strimzi.io/cluster: origin
+  namespace: origin-ns
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    acls:
+      - host: '*'
+        operation: Read
+        resource:
+          name: '*'
+          patternType: literal
+          type: topic
+      - host: '*'
+        operation: Describe
+        resource:
+          name: '*'
+          patternType: literal
+          type: topic
+      - host: '*'
+        operation: DescribeConfigs
+        resource:
+          name: '*'
+          patternType: literal
+          type: topic
+      - host: '*'
+        operation: Create
+        resource:
+          type: cluster
+      - host: '*'
+        operation: Read
+        resource:
+          type: cluster
+      - host: '*'
+        operation: Describe
+        resource:
+          type: cluster
+      - host: '*'
+        operation: Write
+        resource:
+          name: '*'
+          patternType: literal
+          type: topic
+      - host: '*'
+        operation: Describe
+        resource:
+          name: '*'
+          patternType: literal
+          type: group
+      - host: '*'
+        operation: Read
+        resource:
+          name: '*'
+          patternType: literal
+          type: group
+    type: simple
+```
+This will create a new secret with your credentials in the namespace where your “origin” Kafka cluster is running. Copy these into a secret in a namespace on the Kubernetes cluster where you want to run MirrorMaker 2.
 
-If your “target” cluster is managed by Strimzi, 
-you will be able to find this in a Secret called something like target-cluster-ca-cert in the namespace where your Kafka cluster is running.
+2. Look at kafka-password-origin.yaml and run it in the original cluster
 
-step 6 rum  kafka-secret-target.yaml --> add the ca.crt from the secret!
+These credentials will allow MirrorMaker to find and consume from all of the topics on the “origin” cluster. You will need to do something similar using the type of Kafka cluster you are running. However you create your credentials, you should create a Secret similar to the one above.
 
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: origin-cluster-credentials
+  namespace: migration
+data:
+  user.crt
+  user.key
+``` 
 
-step 7 review and customize the file KafkaMirrorMaker.yaml
+3. If your “origin” cluster requires TLS, you may need to obtain a CA cert for MirrorMaker 2 to use.
 
-step 8 one you read and add the values in KafakamirrorMaker file  run it.
-
-Enjoy the data replication across cluster, DC, etc
-
-do not forget to thank https://dalelane.co.uk/blog/?p=4303
-
-if this helped do not forget to contribute in case you did an improvement!!
+If your “origin” cluster is managed by Strimzi, you will be able to find this in a Secret called something like CLUSTERNAME-cluster-ca-cert in the namespace where your Kafka cluster is running. Now is time to create a secret wit the ca.crt:
+```
+kind: Secret
+metadata:
+  name: origin-cluster-ca-cert
+  namespace: migration
+data:
+  ca.crt:
+```
