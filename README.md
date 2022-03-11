@@ -127,3 +127,18 @@ metadata:
 data:
   ca.crt:
 ```
+
+## Now you have all the secrets and users in Target
+   Next steps are the same but now in Origin. So it should be very similar 3 steps.
+
+1. create user in Target
+2. create a secret from a user in Target
+3. create a secret from the internal CLUSTERNAME-ca-cert in target
+
+You should/could use the example files I have in this same tutorial.
+
+## Once I have all the users and secrets in both clusters
+
+So we have all the secrets and it is time to decide where you are going to run MMK. It can run in a 3rd cluster or it can ran on the target, even on the origin cluster is a service independent that where you run it it should work as long as you give the right certs.
+
+
