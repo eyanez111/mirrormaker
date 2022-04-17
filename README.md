@@ -136,6 +136,8 @@ data:
 3. create a secret from the internal CLUSTERNAME-ca-cert in target
 
 You should/could use the example files I have in this same tutorial.
+**
+NOTE: you do not need to create a user. I do not use a user only authentication via TLS and I do steps 1 & 3. My connections works and is fully encrypted and secure between my two clusters!**
 
 ## Once I have all the users and secrets in both clusters
 
