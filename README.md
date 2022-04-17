@@ -1,7 +1,7 @@
 
 # Ultimate MirrorMaker2 Strimzi Tutorial
 
-For Months I struggle trying to make fully work MirrorMaker. Specially if TLS is implemented. The problem is that there is not a full tutorial, on how to install it and how to make it work. You need to do tons of little independent researches and glue them together (in the right order). So it becomes an expert exercise. Overall is not hard of complex is just there is not enough information out there in one single place to make it work step by step.... Until now!
+For Months I struggle trying to make fully work MirrorMaker. Specially if TLS is implemented. The problem is that there is not a full tutorial, on how to install it and how to make it work. You need to do tons of little independent researches and glue them all together (in the right order). So it becomes an expert exercise, complicated and with tons of frustration on the way to learn by trail an error. Overall is not hard or complex, is just there is not enough information out there in one single place to make it work step by step.... Until now!
 
 ## Assumptions:
 
